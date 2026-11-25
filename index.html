@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎬 照顧救火隊｜失智情境即時反應小遊戲</title>
+  <style>
+    :root {
+      --bg-warm: #fdf7ec;
+      --card-bg: #ffffff;
+      --border-warm: #ead9bc;
+      --text-main: #44382e;
+      --text-sub: #766658;
+      --amber: #e29628;
+      --green: #48855b;
+      --green-bg: #ebf6ee;
+      --red: #d44d4d;
+      --red-bg: #fdeeee;
+      --shadow: 0 10px 26px rgba(95, 72, 42, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+      background: linear-gradient(150deg, #fdf7ec 0%, #eef5ef 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 16px;
+      line-height: 1.55;
+    }
+
+    .game-shell {
+      width: 100%;
+      max-width: 560px;
+      background: var(--card-bg);
+      border: 2px solid var(--border-warm);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #ffeec7 0%, #e7f4ea 100%);
+      padding: 16px 20px 14px;
+      border-bottom: 1.5px solid var(--border-warm);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid var(--border-warm);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #8b5615;
+    }
+
+    .mode-toggle {
+      background: #ffffff;
+      border: 1.5px solid #d7c199;
+      color: #6b5132;
+      border-radius: 999px;
+      padding: 4px 11px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .mode-toggle:hover {
+      background: #fff9ec;
+      border-color: var(--amber);
+    }
+
+    .header h1 {
+      font-size: 18.5px;
+      margin-bottom: 3px;
+    }
+
+    .subtitle {
+      font-size: 12.5px;
+      color: var(--text-sub);
+    }
+
+    .body-area {
+      padding: 16px 20px 22px;
+    }
+
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .hearts {
+      font-size: 15px;
+      letter-spacing: 2px;
+    }
+
+    .combo-pill {
+      background: #fff3d6;
+      color: #a66011;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid #f0d29c;
+    }
+
+    .timer-wrap {
+      margin-bottom: 13px;
+    }
+
+    .timer-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+      color: #9e482b;
+      margin-bottom: 4px;
+    }
+
+    .timer-bar {
+      width: 100%;
+      height: 9px;
+      background: #f3e9d8;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .timer-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #48855b, #e29628, #d44d4d);
+      transition: width 0.2s linear;
+    }
+
+    .alert-card {
+      background: #fff9ef;
+      border: 2px solid #eed6ab;
+      border-radius: 15px;
+      padding: 14px 16px;
+      margin-bottom: 13px;
+      position: relative;
+    }
+
+    .alert-badge {
+      display: inline-block;
+      font-size: 11.5px;
+      font-weight: 800;
+      background: #ffe4d9;
+      color: #a8371c;
+      padding: 2px 9px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+
+    .scene-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 5px;
+    }
+
+    .scene-desc {
+      font-size: 13.5px;
+      color: #5e5043;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .act-btn {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #ffffff;
+      border: 2px solid #e5d8c0;
+      border-radius: 13px;
+      padding: 11px 13px;
+      font-size: 13.8px;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+
+    .act-btn:hover:not(:disabled) {
+      border-color: var(--amber);
+      background: #fffaf0;
+      transform: translateY(-1px);
+    }
+
+    .act-btn.correct {
+      border-color: var(--green);
+      background: var(--green-bg);
+      color: #234f30;
+    }
+
+    .act-btn.wrong {
+      border-color: var(--red);
+      background: var(--red-bg);
+      color: #822828;
+    }
+
+    .act-btn.dimmed {
+      opacity: 0.5;
+    }
+
+    .feedback {
+      display: none;
+      margin-top: 13px;
+      border-radius: 13px;
+      padding: 13px 15px;
+      font-size: 13.5px;
+      animation: fadeIn 0.22s ease;
+    }
+
+    .feedback.show { display: block; }
+    .feedback.ok { background: var(--green-bg); border: 1.5px solid #b4d6be; color: #244b30; }
+    .feedback.ng { background: var(--red-bg); border: 1.5px solid #eab7b7; color: #7a2626; }
+
+    .fb-title {
+      font-size: 15px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .next-btn, .start-btn {
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #e29628, #cf7e19);
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 4px 12px rgba(207, 126, 25, 0.25);
+      transition: transform 0.15s ease;
+    }
+
+    .next-btn:hover, .start-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .intro-box, .result-box {
+      text-align: center;
+      padding: 8px 4px;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .big-icon {
+      font-size: 48px;
+      margin-bottom: 6px;
+    }
+
+    .intro-box h2, .result-box h2 {
+      font-size: 19px;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .intro-desc {
+      font-size: 13.5px;
+      color: var(--text-sub);
+      margin-bottom: 14px;
+    }
+
+    .rule-pills {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      text-align: left;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 440px) {
+      .rule-pills { grid-template-columns: 1fr; }
+    }
+
+    .rule-pill {
+      background: #fffaf0;
+      border: 1.5px solid #eedcb9;
+      border-radius: 11px;
+      padding: 9px 11px;
+      font-size: 12.5px;
+    }
+
+    .review-list {
+      text-align: left;
+      background: #fffaf0;
+      border: 1.5px solid var(--border-warm);
+      border-radius: 13px;
+      padding: 11px 14px;
+      font-size: 12.8px;
+      margin: 12px 0;
+    }
+
+    .review-row {
+      padding: 5px 0;
+      border-bottom: 1px dashed #ead9bc;
+    }
+
+    .review-row:last-child { border-bottom: none; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-shell">
+    <div class="header">
+      <div class="header-top">
+        <span class="pill">🎬 情境演練・個人挑戰</span>
+        <button class="mode-toggle" id="modeToggleBtn" type="button">⏱️ 計時模式：開</button>
+      </div>
+      <h1>照顧救火隊：15 秒即時應變！</h1>
+      <div class="subtitle">一個人就能玩的突發情境模擬，在失控前選出最穩妥的滅火動作！</div>
+    </div>
+
+    <div class="body-area">
+      <div class="intro-box" id="introBox">
+        <div class="big-icon">🚒</div>
+        <h2>準備好接手這 8 個突發現場了嗎？</h2>
+        <div class="intro-desc">每關只有 15 秒反應時間（也可切換上方「計時模式：關」慢慢思考），共有 3 顆愛心！</div>
+        <div class="rule-pills">
+          <div class="rule-pill"><b>⚡ 15 秒即時反應</b><br />模擬長照現場突發狀況，考驗直覺判斷。</div>
+          <div class="rule-pill"><b>🔥 連擊 Combo 加分</b><br />連續滅火成功，解鎖最高「金牌救火隊長」！</div>
+        </div>
+        <button class="start-btn" id="startBtn" type="button">🚨 立即出動！開始第 1 關</button>
+      </div>
+
+      <div id="playBox" style="display:none;">
+        <div class="hud">
+          <span id="stageText">第 1 / 8 關</span>
+          <span class="hearts" id="heartsText">❤️❤️❤️</span>
+          <span class="combo-pill" id="comboText">🔥 連對 0</span>
+        </div>
+
+        <div class="timer-wrap" id="timerWrap">
+          <div class="timer-head">
+            <span>🚨 現場情緒升溫中…</span>
+            <span id="secText">15 秒</span>
+          </div>
+          <div class="timer-bar">
+            <div class="timer-fill" id="timerFill"></div>
+          </div>
+        </div>
+
+        <div class="alert-card">
+          <span class="alert-badge" id="alertTag">⚡ 突發狀況</span>
+          <div class="scene-title" id="sceneTitle"></div>
+          <div class="scene-desc" id="sceneDesc"></div>
+        </div>
+
+        <div class="actions" id="actionsBox"></div>
+
+        <div class="feedback" id="feedbackBox">
+          <div class="fb-title" id="fbTitle"></div>
+          <div id="fbText"></div>
+          <button class="next-btn" id="nextBtn" type="button">下一關 ➡️</button>
+        </div>
+      </div>
+
+      <div class="result-box" id="resultBox" style="display:none;">
+        <div class="big-icon" id="resEmoji">🏆</div>
+        <h2 id="resTitle">任務完成！</h2>
+        <div class="intro-desc" id="resSub"></div>
+        <div class="review-list" id="resList"></div>
+        <button class="start-btn" id="restartBtn" type="button">🔄 再挑戰一次（題目隨機洗牌）</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCENES = [
+      {
+        tag: "🌅 傍晚大門口警報",
+        title: "阿嬤提著包包一直往大門走：「我要趕快回家煮飯給媽媽吃！」",
+        desc: "你手邊正在收餐盤，眼看她已經把手搭上門把了，現在怎麼救火？",
+        options: [
+          { text: "大聲喊：「阿嬤你媽媽不在了，這裡才是你家！」", ok: false },
+          { text: "快步走上前微笑挽住她：「想媽媽很急吼，外面天黑風大，先喝杯熱茶陪我摺毛巾好嗎？」", ok: true },
+          { text: "騙她：「你再坐 5 分鐘，你兒子馬上開車來接你！」", ok: false }
+        ],
+        explain: "硬戳破事實會引爆傷心抗拒，虛假保證等一下沒人來會更失控。先接住她想媽媽的心情，再用「喝熱茶＋小幫手任務」安全帶離門口！"
+      },
+      {
+        tag: "👛 房間翻箱倒櫃警報",
+        title: "阿公氣沖沖指著你：「我領的兩千塊不見了！是不是你偷拿的？」",
+        desc: "阿公聲音越來越大、臉漲紅，這時第一步怎麼做？",
+        options: [
+          { text: "馬上澄清：「阿公你誤會了，你自己忘記放哪裡，不信看監視器！」", ok: false },
+          { text: "直接去翻他的枕頭底下把錢拿出來：「你看，就在這啦！」", ok: false },
+          { text: "語氣放穩：「錢不見一定很著急，那很重要耶！來，我陪你一起去房間找找看！」", ok: true }
+        ],
+        explain: "陷入「誰偷拿」的爭辯只會讓信任歸零！陪同尋寶讓他自己找到，既能降溫又保住自尊。"
+      },
+      {
+        tag: "🛁 浴室門口僵持警報",
+        title: "阿嬤雙手抓緊門框大喊：「水很冷！我今天死都不要洗澡！」",
+        desc: "後面還有下一位長者要排隊洗澡，你怎麼處理？",
+        options: [
+          { text: "拉著她的手說：「每天都要洗不然會臭掉，忍耐一下 5 分鐘就好！」", ok: false },
+          { text: "先放開手不催促：「怕冷對不對？今天有開暖氣，你想先泡溫水洗腳，還是先用熱毛巾擦背？」", ok: true },
+          { text: "立刻走掉：「隨便你，不洗就算了！」", ok: false }
+        ],
+        explain: "失去控制感＋怕冷是抗拒洗澡的主因！給她「泡腳 vs 擦背」的二選一，能把主導權還給長者。"
+      },
+      {
+        tag: "🍲 餐桌嗆咳紅旗警報",
+        title: "阿公喝湯時突然連咳兩聲，接著開口說話聲音「濕濕濁濁的」…",
+        desc: "阿公揮手表示沒事還想繼續喝，這時你必須立刻做什麼？",
+        options: [
+          { text: "立刻暫停進食與喝水，讓他坐直清喉，並馬上通報護理師／語言治療師評估。", ok: true },
+          { text: "幫他拍拍背說「慢慢喝就好」，繼續把湯餵完。", ok: false },
+          { text: "去廚房拿太白粉幫他把湯勾芡變濃稠再繼續喝。", ok: false }
+        ],
+        explain: "聲音濕濁＋咳嗽是極度危險的「隱性嗆咳」紅旗！不可繼續餵食，也不可自行亂調濃稠度，必須立刻停下來通報專業評估。"
+      },
+      {
+        tag: "👻 牆角黑影恐慌警報",
+        title: "路易氏體阿公縮在椅子上發抖：「牆角那兩個黑影一直在瞪我！」",
+        desc: "現在是傍晚室內光線偏暗，衣架掛著一件深色外套。",
+        options: [
+          { text: "笑著說：「那只是外套啦，你眼花看錯了！」", ok: false },
+          { text: "陪他緊張：「真的嗎？我拿掃把去把壞人打跑！」", ok: false },
+          { text: "溫和安撫：「看到人影一定嚇一跳，我陪你把大燈打開、把外套收起來確認安全。」", ok: true }
+        ],
+        explain: "不否定也不跟著演恐怖片！直接「開亮燈光＋移除造成陰影的物品」，視幻覺就會自然消退。"
+      },
+      {
+        tag: "💊 拒吃藥丸危機",
+        title: "阿嬤把白色藥丸吐在桌上：「這是毒藥！你們想害我，我不吃！」",
+        desc: "藥必須要吃，但現在阿嬤情緒非常緊繃。",
+        options: [
+          { text: "偷偷把藥全部磨成粉，拌進她等一下要吃的白飯裡。", ok: false },
+          { text: "先不硬塞！安撫情緒換個時機再試，若仍拒藥就回報護理師／藥師確認能否改劑型。", ok: true },
+          { text: "嚇她：「不吃藥病不會好，等一下要送急診打針喔！」", ok: false }
+        ],
+        explain: "很多藥錠（如緩釋錠、腸溶錠）絕對不能自行磨粉，且拌飯沒吃完會沒藥效！先安撫並回報專業評估最安全。"
+      },
+      {
+        tag: "🌙 半夜翻衣櫃不睡覺",
+        title: "凌晨兩點阿公起來把衣櫃衣服全部翻出來，說要準備去工廠上班。",
+        desc: "如果跟他說「半夜兩點上什麼班」，他可能會發脾氣。",
+        options: [
+          { text: "板起臉說：「你早就退休了！現在半夜兩點趕快回去睡覺！」", ok: false },
+          { text: "同理並順應：「工作很辛苦吼～不過現在天黑老闆還沒開門，我們先喝口溫水躺一下，天亮再出門。」", ok: true },
+          { text: "把他關在房間裡，把門反鎖免得他出來吵別人。", ok: false }
+        ],
+        explain: "被貼標籤或強硬制止只會更躁動！順應他的時空給一個「合理的休息理由」，就能柔和引導回床上。"
+      },
+      {
+        tag: "🚨 突發意識混亂警報",
+        title: "昨天阿公還能自己吃完整碗飯，今天中午幾小時內突然「叫不太醒、嘴唇發乾、體溫偏高」。",
+        desc: "這跟平常慢慢退化的樣子完全不一樣！你該怎麼做？",
+        options: [
+          { text: "失智症本來就會退化，先讓他多睡一下，晚餐再叫起來。", ok: false },
+          { text: "趕快拿冰水灌他喝，看能不能清醒一點。", ok: false },
+          { text: "警覺是「急性譫妄／感染」紅旗！切勿強行餵食或灌水，立即通報醫護檢查。", ok: true }
+        ],
+        explain: "失智症是「慢慢退化」，幾小時內突然意識變差＋發燒是急性譫妄／感染警訊！此時強行餵水極易嗆咳，必須立刻通報醫護。"
+      }
+    ];
+
+    let timedMode = true;
+    let deck = [];
+    let idx = 0;
+    let hearts = 3;
+    let combo = 0;
+    let maxCombo = 0;
+    let solved = 0;
+    let timeLeft = 15;
+    let timerId = null;
+    let locked = false;
+    let log = [];
+
+    const modeToggleBtn = document.getElementById("modeToggleBtn");
+    const introBox = document.getElementById("introBox");
+    const playBox = document.getElementById("playBox");
+    const resultBox = document.getElementById("resultBox");
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const stageText = document.getElementById("stageText");
+    const heartsText = document.getElementById("heartsText");
+    const comboText = document.getElementById("comboText");
+    const timerWrap = document.getElementById("timerWrap");
+    const secText = document.getElementById("secText");
+    const timerFill = document.getElementById("timerFill");
+    const alertTag = document.getElementById("alertTag");
+    const sceneTitle = document.getElementById("sceneTitle");
+    const sceneDesc = document.getElementById("sceneDesc");
+    const actionsBox = document.getElementById("actionsBox");
+    const feedbackBox = document.getElementById("feedbackBox");
+    const fbTitle = document.getElementById("fbTitle");
+    const fbText = document.getElementById("fbText");
+    const nextBtn = document.getElementById("nextBtn");
+
+    modeToggleBtn.addEventListener("click", () => {
+      timedMode = !timedMode;
+      modeToggleBtn.textContent = timedMode ? "⏱️ 計時模式：開" : "☕ 慢慢看題：開";
+      timerWrap.style.display = timedMode ? "block" : "none";
+      if (!timedMode && timerId) {
+        clearInterval(timerId);
+        timerId = null;
+      } else if (timedMode && playBox.style.display === "block" && !locked) {
+        startTimer();
+      }
+    });
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function startGame() {
+      deck = shuffle(SCENES);
+      idx = 0;
+      hearts = 3;
+      combo = 0;
+      maxCombo = 0;
+      solved = 0;
+      log = [];
+      introBox.style.display = "none";
+      resultBox.style.display = "none";
+      playBox.style.display = "block";
+      timerWrap.style.display = timedMode ? "block" : "none";
+      renderScene();
+    }
+
+    function updateHud() {
+      stageText.textContent = `第 ${idx + 1} / ${deck.length} 關`;
+      heartsText.textContent = "❤️".repeat(Math.max(0, hearts)) + "🤍".repeat(Math.max(0, 3 - hearts));
+      comboText.textContent = `🔥 連對 ${combo}`;
+    }
+
+    function startTimer() {
+      clearInterval(timerId);
+      timeLeft = 15;
+      secText.textContent = "15 秒";
+      timerFill.style.width = "100%";
+      timerId = setInterval(() => {
+        timeLeft--;
+        secText.textContent = `${Math.max(0, timeLeft)} 秒`;
+        timerFill.style.width = `${Math.max(0, (timeLeft / 15) * 100)}%`;
+        if (timeLeft <= 0) {
+          clearInterval(timerId);
+          timerId = null;
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function renderScene() {
+      locked = false;
+      feedbackBox.className = "feedback";
+      updateHud();
+
+      const sc = deck[idx];
+      alertTag.textContent = sc.tag;
+      sceneTitle.textContent = sc.title;
+      sceneDesc.textContent = sc.desc;
+
+      actionsBox.innerHTML = "";
+      shuffle(sc.options).forEach(op => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "act-btn";
+        btn.dataset.ok = op.ok;
+        btn.textContent = op.text;
+        btn.addEventListener("click", () => handlePick(btn, sc));
+        actionsBox.appendChild(btn);
+      });
+
+      if (timedMode) startTimer();
+    }
+
+    function handlePick(chosenBtn, sc) {
+      if (locked) return;
+      locked = true;
+      clearInterval(timerId);
+      timerId = null;
+
+      const isOk = chosenBtn.dataset.ok === "true";
+      document.querySelectorAll(".act-btn").forEach(b => {
+        b.disabled = true;
+        if (b.dataset.ok === "true") {
+          b.classList.add("correct");
+        } else if (b === chosenBtn && !isOk) {
+          b.classList.add("wrong");
+        } else {
+          b.classList.add("dimmed");
+        }
+      });
+
+      if (isOk) {
+        solved++;
+        combo++;
+        if (combo > maxCombo) maxCombo = combo;
+        feedbackBox.className = "feedback show ok";
+        fbTitle.textContent = "💦 滅火成功！長者情緒穩住了！";
+      } else {
+        combo = 0;
+        hearts--;
+        feedbackBox.className = "feedback show ng";
+        fbTitle.textContent = "🔥 哎呀！這招可能會讓現場更混亂喔！";
+      }
+
+      fbText.textContent = sc.explain;
+      log.push({ title: sc.title, ok: isOk });
+      updateHud();
+      nextBtn.textContent = (idx === deck.length - 1 || hearts <= 0) ? "查看救援成果 🏆" : "下一關 ➡️";
+    }
+
+    function handleTimeout() {
+      if (locked) return;
+      locked = true;
+      const sc = deck[idx];
+      combo = 0;
+      hearts--;
+
+      document.querySelectorAll(".act-btn").forEach(b => {
+        b.disabled = true;
+        if (b.dataset.ok === "true") {
+          b.classList.add("correct");
+        } else {
+          b.classList.add("dimmed");
+        }
+      });
+
+      feedbackBox.className = "feedback show ng";
+      fbTitle.textContent = "⏰ 時間到！現場有點小失控囉（提示：可切換左上角「慢慢看題」）";
+      fbText.textContent = sc.explain;
+      log.push({ title: sc.title, ok: false });
+      updateHud();
+      nextBtn.textContent = (idx === deck.length - 1 || hearts <= 0) ? "查看救援成果 🏆" : "下一關 ➡️";
+    }
+
+    nextBtn.addEventListener("click", () => {
+      if (hearts <= 0 || idx === deck.length - 1) {
+        showResult();
+      } else {
+        idx++;
+        renderScene();
+      }
+    });
+
+    function showResult() {
+      playBox.style.display = "none";
+      resultBox.style.display = "block";
+
+      let emoji = "🚒";
+      let title = `成功滅火 ${solved} / ${deck.length} 關！`;
+      let sub = `最高連擊 🔥 x${maxCombo}。多練習幾次，現場遇到突發狀況就能秒速接招！`;
+      if (hearts <= 0) {
+        emoji = "💛";
+        title = `愛心用完啦！本次救火 ${solved} 關`;
+        sub = "建議可以切換右上角「慢慢看題」，再重新出動一次喔！";
+      } else if (solved === deck.length) {
+        emoji = "🏆";
+        title = "金牌救火隊長！8 關全數通關！";
+        sub = `最高連擊 🔥 x${maxCombo}，任何突發 NG 現場都難不倒你！`;
+      }
+
+      document.getElementById("resEmoji").textContent = emoji;
+      document.getElementById("resTitle").textContent = title;
+      document.getElementById("resSub").textContent = sub;
+      document.getElementById("resList").innerHTML = log.map((r, i) => `
+        <div class="review-row"><b>${r.ok ? "✅" : "📌"} 第 ${i + 1} 關：</b>${r.title}</div>
+      `).join("");
+    }
+
+    startBtn.addEventListener("click", startGame);
+    restartBtn.addEventListener("click", startGame);
+  </script>
+</body>
+</html>
